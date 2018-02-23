@@ -25,6 +25,7 @@ compteur = 0
 c=1
 b = list(dicto.items())
 random.shuffle(b)
+print "Tu peux à tout moment taper 'fuck' si tu estimes avoir mériter le point et que ta réponse a été marqué incorrect."
 for key,value in b:
 
 	q = key
