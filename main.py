@@ -50,7 +50,7 @@ for key,value in b:
 		print "Correct"
 		compteur+=1
 	else:
-		print "Incorrect : réponse correct : "+a
+		uprint "Incorrect : la réponse correct était : "+a
 	c+=1
 
 print "\n Score:"+str(compteur)+"/"+str(len(dicto))
