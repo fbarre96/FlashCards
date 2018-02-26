@@ -8,6 +8,18 @@ def loadFile(path):
 		contenu = fichier.read()
 		return contenu
 
+def afficheAide(reponse, nbIndiceDonnee):
+	if nbIndiceDonnee == 1:
+		print "*"*(len(reponse)-1)+reponse[-1]
+	elif nbIndiceDonnee == 2:
+		print reponse[0]+"*"*(len(reponse)-2)+reponse[-1]
+	elif nbIndiceDonnee == 3:
+		print reponse[:2]+"*"*(len(reponse)-4)+reponse[-2:]
+	elif nbIndiceDonnee >= 4:
+		if len(reponse)>=((nbIndiceDonnee-1)*2)+1:
+			print reponse[:nbIndiceDonnee-1]+"*"*(len(reponse)-(nbIndiceDonnee-1)*2)+reponse[0-(nbIndiceDonnee-1):]
+		else:
+			print "Plus d'indice à donné !"
 if len(sys.argv) != 2:
 	print "Usage: python main.py <deck.d>"
 	sys.exit(1)
@@ -20,14 +32,15 @@ print "1. Recto/Verso"
 print "2. Verso/Recto"
 print "3. Random"
 choix = input()
-
 compteur = 0
 c=1
 b = list(dicto.items())
 random.shuffle(b)
 print "Tu peux à tout moment taper 'fuck' si tu estimes avoir mérité le point et que ta réponse a été marqué incorrect."
-for key,value in b:
+print "Tu peux à tout moment taper 'aide' si tu veux un indice (le point ne sera pas accordé)."
 
+for key,value in b:
+	nbIndiceDonnee=0
 	q = key
 	a = value
 	b=0
@@ -36,21 +49,27 @@ for key,value in b:
 	if choix == 2 or b == 1:
 		q = value
 		a = key
-	
-	print "Question "+str(c)+"/"+str(len(dicto))+": "+(q)
-	print u"Réponse: ",
-	answer = raw_input().decode(sys.stdin.encoding or locale.getpreferredencoding(True))
-	if answer.lower() == u"fuck":
-		compteur+=1
-		print u"La réponse à votre précédant question a été changé à Correct"
+	changeQuestion=False
+	while not changeQuestion:
 		print "Question "+str(c)+"/"+str(len(dicto))+": "+(q)
-		print "Réponse: ",
+		print u"Réponse: ",
 		answer = raw_input().decode(sys.stdin.encoding or locale.getpreferredencoding(True))
-	if answer.lower() == a.lower():
-		print "Correct"
-		compteur+=1
-	else:
-		print u"Incorrect : la réponse correct était : "+a
+		if answer.lower() == u"fuck":
+			compteur+=1
+			print u"La réponse à votre précédant question a été changé à Correct"
+		elif answer.lower() == u"aide":
+			nbIndiceDonnee+=1
+			afficheAide(a,nbIndiceDonnee)
+		elif answer.lower() == a.lower():
+			if nbIndiceDonnee == 0:
+				compteur+=1
+				print "Correct (+1 point)"
+			else:
+				print "Correct (+0 point)"
+			changeQuestion = True
+		else:
+			print u"Incorrect : la réponse correct était : "+a
+			changeQuestion = True
 	c+=1
 
 print "\n Score:"+str(compteur)+"/"+str(len(dicto))
