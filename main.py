@@ -71,6 +71,7 @@ for key,value in b:
 				print "Correct (+1 point)"
 			else:
 				print "Correct (+0 point)"
+				wrongs.append([q,a])
 			changeQuestion = True
 		else:
 			print u"Incorrect : la réponse correct était : "+a
