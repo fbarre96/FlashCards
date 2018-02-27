@@ -2,6 +2,7 @@
 import json
 import random
 import sys, locale
+import os
 from collections import OrderedDict 
 def loadFile(path):
 	with open(path) as fichier:
@@ -23,7 +24,7 @@ def afficheAide(reponse, nbIndiceDonnee):
 if len(sys.argv) != 2:
 	print "Usage: python main.py <deck.d>"
 	sys.exit(1)
-
+wrongs = []
 nom=sys.argv[1]
 contenu = loadFile(nom)
 dicto = json.loads(contenu)
@@ -55,8 +56,12 @@ for key,value in b:
 		print u"Réponse: ",
 		answer = raw_input().decode(sys.stdin.encoding or locale.getpreferredencoding(True))
 		if answer.lower() == u"fuck":
-			compteur+=1
-			print u"La réponse à votre précédant question a été changé à Correct"
+			if len(wrongs)>0:
+				compteur+=1
+				wrongs.pop()
+				print u"La réponse à votre précédante question a été changé à Correct"
+			else:
+				print u"Il n'y a pas de mauvaises réponses."
 		elif answer.lower() == u"aide":
 			nbIndiceDonnee+=1
 			afficheAide(a,nbIndiceDonnee)
@@ -69,7 +74,30 @@ for key,value in b:
 			changeQuestion = True
 		else:
 			print u"Incorrect : la réponse correct était : "+a
+			wrongs.append([q,a])
 			changeQuestion = True
 	c+=1
 
 print "\n Score:"+str(compteur)+"/"+str(len(dicto))
+reponse = ""
+if len(wrongs)>0:
+	dicoWrongs = {}
+	for wrong in wrongs:
+		dicoWrongs[wrong[0]] = wrong[1]
+	while reponse.lower() != "oui" and reponse.lower() != "non":
+		print "Voulez vous stocker vos fautes dans un dictionnaire ? (oui/non)"
+		reponse = raw_input()
+
+	if reponse.lower() == "oui":
+		nom = sys.argv[1]+"_incorrects"
+		if os.path.exists(nom+".d"):
+			tentative = 1
+			while os.path.exists(nom+"("+str(tentative)+").d"):
+				tentative += 1
+				if tentative == 100:
+					break
+			with open(nom+"("+str(tentative)+").d","w") as fichier:
+				fichier.write(json.dumps(dicoWrongs))
+		else:
+			with open(nom+".d","w") as fichier:
+				fichier.write(json.dumps(dicoWrongs))
