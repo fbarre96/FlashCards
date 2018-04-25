@@ -28,11 +28,13 @@ wrongs = []
 nom=sys.argv[1]
 contenu = loadFile(nom)
 dicto = json.loads(contenu)
+modifiedAnswers = False
 print "Choisi le sens des cartes pour les questions:"
 print "1. Recto/Verso"
 print "2. Verso/Recto"
 print "3. Random"
 choix = input()
+choixRecto = True
 compteur = 0
 c=1
 b = list(dicto.items())
@@ -50,6 +52,7 @@ for key,value in b:
 	if choix == 2 or b == 1:
 		q = value
 		a = key
+		choixRecto = False
 	changeQuestion=False
 	while not changeQuestion:
 		print "Question "+str(c)+"/"+str(len(dicto))+": "+(q)
@@ -65,6 +68,31 @@ for key,value in b:
 		elif answer.lower() == u"aide":
 			nbIndiceDonnee+=1
 			afficheAide(a,nbIndiceDonnee)
+		elif answer.lower() == u"change":
+			if len(wrongs)>0:
+				old_q = wrongs[-1][0]
+				old_a = wrongs[-1][1]
+				print "Question was "+old_q+" and anwer was "+old_a
+				print "New question (empty to skip):"
+				new_q = raw_input().decode(sys.stdin.encoding or locale.getpreferredencoding(True))
+
+				print "New answer (empty to skip):"
+				new_a = raw_input().decode(sys.stdin.encoding or locale.getpreferredencoding(True))
+				if choixRecto:
+					if new_q != u"":
+						del dicto[old_q]
+						dicto[new_q]=old_a
+						old_q = new_q
+					if new_a != u"":
+						dicto[old_q]=new_a
+				else:
+					if new_a != u"":
+						del dicto[old_a]
+						dicto[new_a]=old_q
+						old_a=new_a		
+					if new_q != u"":
+						dicto[old_a]=new_q
+				modifiedAnswers = True
 		elif answer.lower() == a.lower():
 			if nbIndiceDonnee == 0:
 				compteur+=1
@@ -81,6 +109,17 @@ for key,value in b:
 
 print "\n Score:"+str(compteur)+"/"+str(len(dicto))
 reponse = ""
+if modifiedAnswers:
+	answer = ""
+	while answer == "":
+		print "There has been changes while playing. Do you want to save y/n"
+		answer = raw_input()
+		if answer == "y":
+			fi = open(sys.argv[1],"w")
+			fi.write(json.dumps(dicto))
+			fi.close()
+		elif answer != "n":#No clear answer
+			answer = ""
 if len(wrongs)>0:
 	dicoWrongs = {}
 	for wrong in wrongs:
